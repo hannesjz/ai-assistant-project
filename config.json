@@ -1,0 +1,38 @@
+{
+  "data_dir": "./data",
+  "models_dir": "./models",
+  "db_path": "./data/memory.db",
+  "vector_dimension": 768,
+  "gcs": {
+    "bucket_name": "hannesjz-files",
+    "credentials_path": null,
+    "local_cache_dir": "./gcs_cache"
+  },
+  "github": {
+    "repo_url": "https://github.com/hannesjz/my-project-name.git",
+    "local_path": "./github_repo",
+    "username": "hannesjz",
+    "email": "hannes_zachari@hotmail.com",
+    "auto_commit_interval_minutes": 30
+  },
+  "memory": {
+    "db_path": "./memory/memory.db",
+    "vector_dimension": 768,
+    "max_documents": 10000
+  },
+  "huggingface": {
+    "cache_dir": "./models",
+    "device": null,
+    "multi_gpu": true,
+    "default_models": {
+      "embeddings": "sentence-transformers/all-MiniLM-L6-v2",
+      "classification": "distilbert-base-uncased-finetuned-sst-2-english",
+      "ner": "dslim/bert-base-NER",
+      "qa": "distilbert-base-cased-distilled-squad"
+    }
+  },
+  "document_processing": {
+    "use_ocr": true,
+    "supported_file_types": [".pdf", ".xlsx", ".xls", ".csv", ".txt", ".docx"]
+  }
+}

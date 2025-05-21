@@ -1,0 +1,38 @@
+FAKTURA
+
+Fakturanummer: 2023-001
+Datum: 2023-05-15
+
+FRÅN:
+Företag AB
+Storgatan 123
+123 45 Stockholm
+Org.nr: 556123-4567
+Tel: 08-123 45 67
+E-post: info@foretagab.se
+
+TILL:
+Kund AB
+Kundvägen 45
+987 65 Göteborg
+Org.nr: 556789-0123
+
+BETALNINGSINFORMATION:
+Bankgiro: 123-4567
+Förfallodatum: 2023-06-15
+Betalningsvillkor: 30 dagar
+
+BESKRIVNING                ANTAL   PRIS      SUMMA
+---------------------------------------------------------
+Konsulttjänster            10 h    1 200 kr  12 000 kr
+Programvaruutveckling      15 h    1 500 kr  22 500 kr
+Projektledning              5 h    1 800 kr   9 000 kr
+---------------------------------------------------------
+                                   DELSUMMA:  43 500 kr
+                                   MOMS 25%:  10 875 kr
+                                   TOTALT:    54 375 kr
+
+MEDDELANDE:
+Tack för ert förtroende! Vid frågor, kontakta oss på info@foretagab.se.
+
+Betalning ska ske senast på förfallodagen. Vid försenad betalning debiteras dröjsmålsränta enligt räntelagen.

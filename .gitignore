@@ -1,0 +1,28 @@
+# Ignore large PDF files
+downloaded_docs/bok/*.pdf
+downloaded_docs/ekonomi_analys_paket_20250403_101259/Övrigt/*.zip
+
+# Ignore other large files
+*.zip
+*.pdf
+
+# Keep specific PDF files that are smaller
+!src/**/*.pdf
+!test_files/**/*.pdf
+
+# Common files to ignore
+.DS_Store
+node_modules/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+.venv
+env/
+venv/
+ENV/
+downloaded_docs/
+downloaded_docs/
+*.pdf
+*.zip
