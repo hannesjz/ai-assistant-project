@@ -4,13 +4,13 @@ Solves multiple-choice quiz questions in ~1 second using on-device OCR + Claude 
 
 ## How it works
 
-1. You take a screenshot of the quiz question (Side button + Volume up)
-2. The app detects the new screenshot via `PHPhotoLibraryChangeObserver`
-3. Apple Vision extracts the text on-device (~100–300 ms)
-4. Claude Haiku 4.5 identifies the correct answer (~300–700 ms)
+1. Tap **Starta Quiz Solver** — iOS asks to allow screen recording (once)
+2. Open the quiz app; `RPScreenRecorder` streams live frames to QuizSolver
+3. Apple Vision runs OCR on each frame on-device (~100–300 ms)
+4. When a new question is detected, Claude Haiku 4.5 picks the answer (~300–700 ms)
 5. The answer appears as a notification banner on top of the quiz app
 
-**Total latency: ~600 ms – 1.4 s**
+**No manual screenshots needed. Total latency: ~1–1.5 s from question appearing.**
 
 ## Setup in Xcode
 
@@ -69,28 +69,22 @@ The photo library and notifications do not work in Simulator — run on a physic
 
 ## Usage
 
-1. Open QuizSolver in Split View or Slide Over alongside the quiz app
+1. Open QuizSolver alongside the quiz app (Split View or Slide Over)
 2. Tap **Starta Quiz Solver**
-3. Grant photo library access when prompted
-4. When a question appears, take a screenshot (Side button + Volume up)
-5. Within ~1 second, a notification banner shows the answer number
+3. Approve the screen recording prompt from iOS
+4. Switch to the quiz app — answers appear automatically as notification banners
 
 ## Architecture
 
 ```
-Screenshot taken by user
-        │
+RPScreenRecorder (live frame stream ~60 fps)
+        │  throttled to 1 frame/sec
         ▼
-PHPhotoLibraryChangeObserver (ScreenshotMonitor)
-        │  detects new PHAsset
-        ▼
-PHImageManager → UIImage
-        │
-        ▼
-OCRService (Apple Vision on-device)
+OCRService (Apple Vision on-device, ~100–300 ms)
         │  raw OCR text
+        │  skip if same question as before
         ▼
-ClaudeAPIClient → POST /v1/messages  (claude-haiku-4-5)
+ClaudeAPIClient → POST /v1/messages  (claude-haiku-4-5, ~300–700 ms)
         │  single digit 1–4
         ▼
 NotificationService → UNUserNotificationCenter
@@ -99,8 +93,21 @@ NotificationService → UNUserNotificationCenter
 Notification visible on top of quiz app ✅
 ```
 
+## Files
+
+| File | Purpose |
+|------|---------|
+| `Services/LiveScreenMonitor.swift` | ReplayKit capture + OCR + API pipeline |
+| `Services/OCRService.swift` | On-device Vision OCR |
+| `Services/ClaudeAPIClient.swift` | Anthropic API — `claude-haiku-4-5` |
+| `Services/NotificationService.swift` | UNUserNotificationCenter answer banner |
+| `QuizSolverApp.swift` | App entry point + AppDelegate |
+| `ContentView.swift` | SwiftUI main UI |
+| `Views/AnswerOverlayView.swift` | In-app floating answer bubble |
+
 ## Privacy
 
 - OCR runs entirely on-device via Apple's Vision framework — no image data leaves the phone
 - Only the extracted text is sent to the Anthropic API
 - The API key is stored in `UserDefaults` (consider Keychain for production use)
+- Screen recording requires explicit user approval via iOS system dialog

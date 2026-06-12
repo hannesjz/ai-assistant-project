@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
 
-    @StateObject private var monitor = ScreenshotMonitor()
+    @StateObject private var monitor = LiveScreenMonitor()
     @State private var apiKey = UserDefaults.standard.string(forKey: "anthropic_api_key") ?? ""
     @State private var showAPIKeyField = false
 
@@ -91,12 +91,10 @@ struct ContentView: View {
 
     private var monitorButton: some View {
         Button {
-            Task {
-                if monitor.isMonitoring {
-                    monitor.stopMonitoring()
-                } else {
-                    await monitor.requestPermissionAndStart()
-                }
+            if monitor.isMonitoring {
+                monitor.stop()
+            } else {
+                monitor.start()
             }
         } label: {
             Label(
@@ -118,7 +116,7 @@ struct ContentView: View {
                 .font(.caption.bold())
                 .foregroundColor(.secondary)
 
-            Text("1. Starta Quiz Solver\n2. Ta en skärmbild av quizfrågan (Sido-knapp + Volym upp)\n3. Svaret visas som en notis inom ~1 sekund")
+            Text("1. Starta Quiz Solver och godkänn skärminspelning\n2. Öppna quiz-appen – Quiz Solver läser skärmen live\n3. Svaret visas automatiskt som en notis inom ~1 sekund")
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)

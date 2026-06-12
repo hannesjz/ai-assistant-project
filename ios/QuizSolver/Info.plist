@@ -19,15 +19,11 @@
 	<key>CFBundleVersion</key>
 	<string>1</string>
 
-	<!-- Photo library access for reading new screenshots -->
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Quiz Solver behöver tillgång till fotobiblioteket för att läsa av skärmbilder du tar under quiz-spel.</string>
-
 	<!-- Notifications for delivering the answer banner on top of other apps -->
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>Quiz Solver visar svaret som en notis ovanpå quiz-appen.</string>
 
-	<!-- Required for time-sensitive notification delivery -->
+	<!-- ReplayKit screen capture runs in the foreground; no special key needed -->
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
