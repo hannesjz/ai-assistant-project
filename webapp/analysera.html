@@ -1,0 +1,521 @@
+<title>Instrumentalanalys</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+  :root{
+    --surface:#F5F6F4; --card:#FFFFFF; --ink:#191E1C; --ink-2:#5A6560; --line:#E2E6E4;
+    --accent:#17795F; --accent-deep:#0F5945; --accent-soft:#DCEEE8;
+    --seq-1:#8ED0BD; --seq-2:#2E9E83; --seq-3:#0F5945;
+    --chip-ink-1:#0F3D30; --chip-ink-2:#FFFFFF; --chip-ink-3:#FFFFFF;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --surface:#141817; --card:#1B211F; --ink:#E6ECE9; --ink-2:#93A09A; --line:#2A322F;
+      --accent:#45C7A6; --accent-deep:#6FD8BC; --accent-soft:#1E3B32;
+      --seq-1:#1E6B55; --seq-2:#2E9E83; --seq-3:#6FD8BC;
+      --chip-ink-1:#D7EFE7; --chip-ink-2:#08201A; --chip-ink-3:#08201A;
+    }
+  }
+  :root[data-theme="light"]{
+    --surface:#F5F6F4; --card:#FFFFFF; --ink:#191E1C; --ink-2:#5A6560; --line:#E2E6E4;
+    --accent:#17795F; --accent-deep:#0F5945; --accent-soft:#DCEEE8;
+    --seq-1:#8ED0BD; --seq-2:#2E9E83; --seq-3:#0F5945;
+    --chip-ink-1:#0F3D30; --chip-ink-2:#FFFFFF; --chip-ink-3:#FFFFFF;
+  }
+  :root[data-theme="dark"]{
+    --surface:#141817; --card:#1B211F; --ink:#E6ECE9; --ink-2:#93A09A; --line:#2A322F;
+    --accent:#45C7A6; --accent-deep:#6FD8BC; --accent-soft:#1E3B32;
+    --seq-1:#1E6B55; --seq-2:#2E9E83; --seq-3:#6FD8BC;
+    --chip-ink-1:#D7EFE7; --chip-ink-2:#08201A; --chip-ink-3:#08201A;
+  }
+  *{box-sizing:border-box}
+  html{background:var(--surface)}
+  body{
+    margin:0; padding:0 16px calc(32px + env(safe-area-inset-bottom));
+    background:var(--surface); color:var(--ink);
+    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    -webkit-text-size-adjust:100%;
+  }
+  main{max-width:640px; margin:0 auto; display:flex; flex-direction:column; gap:14px}
+  .mono{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace; font-variant-numeric:tabular-nums}
+
+  header{padding:28px 2px 6px}
+  header h1{margin:0; font-size:1.7rem; font-weight:800; letter-spacing:-0.02em; text-wrap:balance}
+  header h1 .tick{color:var(--accent)}
+  header p{margin:6px 0 0; color:var(--ink-2); font-size:.95rem; max-width:46ch}
+
+  .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px}
+  .card h2{margin:0 0 12px; font-size:.78rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-2)}
+
+  /* Uppladdning */
+  #dropzone{border:1.5px dashed var(--accent); background:var(--accent-soft); text-align:center; padding:30px 18px; border-radius:14px}
+  #dropzone p{margin:10px 0 0; color:var(--ink-2); font-size:.88rem}
+  .btn{
+    display:inline-block; background:var(--accent); color:var(--card);
+    border:none; border-radius:12px; padding:14px 26px;
+    font-size:1.05rem; font-weight:700; cursor:pointer;
+  }
+  :root[data-theme="dark"] .btn, :root:not([data-theme="light"]) .btn{color:var(--card)}
+  .btn:focus-visible, button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+  .btn-ghost{background:transparent; color:var(--accent); border:1.5px solid var(--accent); border-radius:12px; padding:11px 20px; font-size:.95rem; font-weight:700; cursor:pointer}
+  input[type=file]{display:none}
+
+  /* Progress */
+  #progress{display:none}
+  .bar-track{height:8px; background:var(--line); border-radius:4px; overflow:hidden}
+  .bar-fill{height:100%; width:0%; background:var(--accent); border-radius:4px; transition:width .2s}
+  #progress-label{margin-top:8px; font-size:.85rem; color:var(--ink-2)}
+
+  /* Stat-rutor */
+  .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+  .stat{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 12px; text-align:center}
+  .stat .v{font-size:1.45rem; font-weight:800; letter-spacing:-0.01em}
+  .stat .l{font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2); margin-top:2px}
+
+  ul.summary{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:9px}
+  ul.summary li{padding-left:18px; position:relative; font-size:.95rem}
+  ul.summary li::before{content:""; position:absolute; left:2px; top:.55em; width:7px; height:7px; border-radius:50%; background:var(--accent)}
+
+  canvas{display:block; width:100%; height:120px; border-radius:8px}
+
+  /* Frekvensband */
+  .band{display:grid; grid-template-columns:1fr; gap:3px; margin-bottom:11px}
+  .band .name{font-size:.82rem; color:var(--ink-2)}
+  .band .row{display:flex; align-items:center; gap:8px}
+  .band .track{flex:1; height:14px; background:var(--line); border-radius:4px; overflow:hidden}
+  .band .fill{height:100%; background:var(--accent); border-radius:0 4px 4px 0; min-width:2px}
+  .band .val{font-size:.82rem; width:52px; text-align:right; color:var(--ink)}
+
+  table.kv{width:100%; border-collapse:collapse; font-size:.9rem}
+  table.kv td{padding:7px 0; border-bottom:1px solid var(--line); vertical-align:top}
+  table.kv tr:last-child td{border-bottom:none}
+  table.kv td:first-child{color:var(--ink-2); padding-right:12px}
+  table.kv td:last-child{text-align:right}
+
+  /* Sektioner */
+  .sect{display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid var(--line); font-size:.9rem}
+  .sect:last-child{border-bottom:none}
+  .sect .time{width:104px; color:var(--ink-2)}
+  .sect .strip{flex:1; height:10px; border-radius:4px; background:var(--line); position:relative; overflow:hidden}
+  .sect .strip i{position:absolute; inset:0; border-radius:4px}
+  .chip{font-size:.72rem; font-weight:700; letter-spacing:.03em; padding:3px 9px; border-radius:99px}
+  .chip.c1{background:var(--seq-1); color:var(--chip-ink-1)}
+  .chip.c2{background:var(--seq-2); color:var(--chip-ink-2)}
+  .chip.c3{background:var(--seq-3); color:var(--chip-ink-3)}
+
+  #error{display:none; border-color:#B3564A; color:#B3564A; font-size:.92rem}
+  #results{display:none; flex-direction:column; gap:14px}
+  .actions{display:flex; gap:10px; flex-wrap:wrap}
+  footer{color:var(--ink-2); font-size:.8rem; padding:6px 2px}
+  @media (prefers-reduced-motion: reduce){ .bar-fill{transition:none} }
+</style>
+
+<main>
+  <header>
+    <h1><span class="tick">▎</span>Instrumentalanalys</h1>
+    <p>Välj en låt från din iPhone så kännetecknas ljudet: tempo, tonart, klangfärg, frekvensbalans, dynamik och struktur. Allt analyseras direkt i mobilen — filen laddas aldrig upp någonstans.</p>
+  </header>
+
+  <div id="dropzone">
+    <label class="btn" for="file-input">Välj ljudfil</label>
+    <input id="file-input" type="file" accept="audio/*,.mp3,.wav,.m4a,.flac,.ogg,.aac,.aif,.aiff">
+    <p>mp3 · m4a · wav · flac m.fl. — t.ex. från Filer, Röstmemon (dela → Spara i Filer) eller GarageBand.</p>
+  </div>
+
+  <div class="card" id="progress">
+    <h2 id="progress-file">Analyserar …</h2>
+    <div class="bar-track"><div class="bar-fill" id="progress-fill"></div></div>
+    <div id="progress-label">Läser in filen …</div>
+  </div>
+
+  <div class="card" id="error"></div>
+
+  <div id="results">
+    <div class="stats">
+      <div class="stat"><div class="v mono" id="stat-bpm">–</div><div class="l">BPM</div></div>
+      <div class="stat"><div class="v" id="stat-key">–</div><div class="l">Tonart</div></div>
+      <div class="stat"><div class="v mono" id="stat-len">–</div><div class="l">Längd</div></div>
+    </div>
+
+    <div class="card"><h2>Sammanfattning</h2><ul class="summary" id="summary"></ul></div>
+
+    <div class="card"><h2>Vågform</h2><canvas id="wave" height="120"></canvas></div>
+
+    <div class="card"><h2>Frekvensbalans · andel av energin</h2><div id="bands"></div></div>
+
+    <div class="card"><h2>Klangfärg &amp; dynamik</h2><table class="kv mono" id="kv"></table></div>
+
+    <div class="card"><h2>Struktur</h2><div id="sections"></div></div>
+
+    <div class="actions">
+      <button class="btn-ghost" id="copy-btn">Kopiera rapport</button>
+      <label class="btn-ghost" for="file-input" style="cursor:pointer">Analysera en till</label>
+    </div>
+  </div>
+
+  <footer>Tonartsanalys kan förväxla parallelltonarter (samma toner, t.ex. C-dur/A-moll). BPM kan ibland hittas som halva/dubbla tempot.</footer>
+</main>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const NOTES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const MAJOR = [6.35,2.23,3.48,2.33,4.38,4.09,2.52,5.19,2.39,3.66,2.29,2.88];
+const MINOR = [6.33,2.68,3.52,5.38,2.60,3.53,2.54,4.75,3.98,2.69,3.34,3.17];
+const BANDS = [
+  ["Sub-bas 20–60 Hz",20,60],["Bas 60–250 Hz",60,250],
+  ["Lägre mellanregister 250–500 Hz",250,500],["Mellanregister 500 Hz–2 kHz",500,2000],
+  ["Övre mellanregister 2–4 kHz",2000,4000],["Presens 4–6 kHz",4000,6000],
+  ["Briljans 6–11 kHz",6000,11025],
+];
+const SR = 22050, NFFT = 2048, HOP = 512;
+let lastReport = "";
+
+function makeFFT(n){
+  const rev = new Uint32Array(n);
+  for(let i=0;i<n;i++){let r=0,x=i;for(let b=1;b<n;b<<=1){r=(r<<1)|(x&1);x>>=1;}rev[i]=r;}
+  const cosT = new Float32Array(n/2), sinT = new Float32Array(n/2);
+  for(let i=0;i<n/2;i++){cosT[i]=Math.cos(-2*Math.PI*i/n);sinT[i]=Math.sin(-2*Math.PI*i/n);}
+  return (re,im)=>{
+    for(let i=0;i<n;i++){const j=rev[i];if(j>i){let t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t;}}
+    for(let len=2;len<=n;len<<=1){
+      const half=len>>1, step=n/len;
+      for(let i=0;i<n;i+=len) for(let k=0;k<half;k++){
+        const c=cosT[k*step], s=sinT[k*step], j=i+k, l=j+half;
+        const tr=re[l]*c-im[l]*s, ti=re[l]*s+im[l]*c;
+        re[l]=re[j]-tr; im[l]=im[j]-ti; re[j]+=tr; im[j]+=ti;
+      }
+    }
+  };
+}
+
+async function decodeToMono(file){
+  const data = await file.arrayBuffer();
+  const AC = window.AudioContext || window.webkitAudioContext;
+  const ac = new AC();
+  let buf;
+  try {
+    buf = await new Promise((res,rej)=>{ ac.decodeAudioData(data,res,rej); });
+  } finally { ac.close && ac.close(); }
+  const len = Math.ceil(buf.duration * SR);
+  const oac = new OfflineAudioContext(1, len, SR);
+  const src = oac.createBufferSource();
+  src.buffer = buf; src.connect(oac.destination); src.start();
+  const out = await oac.startRendering();
+  return out.getChannelData(0);
+}
+
+function setProgress(pct, label){
+  $("progress-fill").style.width = pct + "%";
+  if(label) $("progress-label").textContent = label;
+}
+const yieldUI = () => new Promise(r=>setTimeout(r,0));
+
+async function analyze(y){
+  const fft = makeFFT(NFFT);
+  const win = new Float32Array(NFFT);
+  for(let i=0;i<NFFT;i++) win[i] = 0.5 - 0.5*Math.cos(2*Math.PI*i/(NFFT-1));
+  const nFrames = Math.max(1, Math.floor((y.length - NFFT) / HOP) + 1);
+  const frameRate = SR / HOP;
+  const binHz = SR / NFFT, nBins = NFFT/2;
+
+  const rms = new Float32Array(nFrames);
+  const flux = new Float32Array(nFrames);
+  const centroid = new Float32Array(nFrames);
+  const rolloff = new Float32Array(nFrames);
+  const flatness = new Float32Array(nFrames);
+  const chroma = new Float64Array(12);
+  const bandEnergy = new Float64Array(BANDS.length);
+  const pitchClass = new Int8Array(nBins);
+  for(let b=1;b<nBins;b++){
+    const f = b*binHz;
+    pitchClass[b] = (f>=55 && f<=4200) ? ((Math.round(12*Math.log2(f/440))+69)%12+12)%12 : -1;
+  }
+  const re = new Float32Array(NFFT), im = new Float32Array(NFFT);
+  let prevMag = new Float32Array(nBins), mag = new Float32Array(nBins);
+
+  for(let fi=0; fi<nFrames; fi++){
+    const off = fi*HOP;
+    let sq=0;
+    for(let i=0;i<NFFT;i++){ const s=y[off+i]||0; re[i]=s*win[i]; im[i]=0; sq+=s*s; }
+    rms[fi] = Math.sqrt(sq/NFFT);
+    fft(re,im);
+    let power=0, cNum=0, logSum=0, fl=0;
+    for(let b=0;b<nBins;b++){
+      const m = Math.hypot(re[b],im[b]);
+      mag[b]=m;
+      const p = m*m;
+      power+=p; cNum += (b*binHz)*p; logSum += Math.log(p+1e-12);
+      const d = m - prevMag[b]; if(d>0) fl+=d;
+    }
+    flux[fi]=fl;
+    centroid[fi] = cNum/(power+1e-12);
+    flatness[fi] = Math.exp(logSum/nBins)/(power/nBins+1e-12);
+    let cum=0, target=0.85*power, ro=nBins-1;
+    for(let b=0;b<nBins;b++){ cum+=mag[b]*mag[b]; if(cum>=target){ro=b;break;} }
+    rolloff[fi]=ro*binHz;
+    for(let b=1;b<nBins;b++){
+      const p=mag[b]*mag[b], f=b*binHz;
+      if(pitchClass[b]>=0) chroma[pitchClass[b]] += mag[b];
+      for(let k=0;k<BANDS.length;k++) if(f>=BANDS[k][1] && f<BANDS[k][2]){ bandEnergy[k]+=p; break; }
+    }
+    const t=prevMag; prevMag=mag; mag=t;
+    if(fi % 400 === 0){ setProgress(10+70*fi/nFrames, "Analyserar spektrum … " + Math.round(100*fi/nFrames) + " %"); await yieldUI(); }
+  }
+
+  setProgress(82, "Beräknar tempo och tonart …"); await yieldUI();
+
+  // --- Tempo: autokorrelation av detrendad onset-kurva, viktad mot 120 BPM
+  const env = new Float32Array(nFrames);
+  const meanWin = Math.round(frameRate*0.8);
+  for(let i=0;i<nFrames;i++){
+    let s=0,n=0;
+    for(let j=Math.max(0,i-meanWin); j<Math.min(nFrames,i+meanWin); j++){ s+=flux[j]; n++; }
+    env[i] = Math.max(0, flux[i]-s/n);
+  }
+  let bestLag=0, bestScore=-1;
+  const minLag = Math.round(60*frameRate/220), maxLag = Math.min(nFrames-1, Math.round(60*frameRate/40));
+  for(let lag=minLag; lag<=maxLag; lag++){
+    let s=0; for(let i=0;i+lag<nFrames;i++) s += env[i]*env[i+lag];
+    const bpm = 60*frameRate/lag;
+    const w = Math.exp(-0.5*Math.pow(Math.log2(bpm/120)/0.9, 2));
+    if(s*w > bestScore){ bestScore=s*w; bestLag=lag; }
+  }
+  const bpm = bestLag>0 ? 60*frameRate/bestLag : 0;
+
+  // --- Anslag (onsets): toppar i onset-kurvan
+  let eMean=0; for(let i=0;i<nFrames;i++) eMean+=env[i]; eMean/=nFrames;
+  let eSd=0; for(let i=0;i<nFrames;i++) eSd+=(env[i]-eMean)**2; eSd=Math.sqrt(eSd/nFrames);
+  const thr = eMean + 0.7*eSd, minGap = Math.round(frameRate*0.09);
+  const onsetTimes=[]; let lastOn=-minGap;
+  for(let i=1;i<nFrames-1;i++)
+    if(env[i]>thr && env[i]>=env[i-1] && env[i]>env[i+1] && i-lastOn>=minGap){ onsetTimes.push(i/frameRate); lastOn=i; }
+  const duration = y.length/SR;
+  const beatPeriod = bestLag/frameRate;
+  const beatIv=[];
+  for(let i=1;i<onsetTimes.length;i++){
+    const iv=onsetTimes[i]-onsetTimes[i-1];
+    if(iv>0.7*beatPeriod && iv<1.3*beatPeriod) beatIv.push(iv);
+  }
+  let regularity=0;
+  if(beatIv.length>2){
+    const m=beatIv.reduce((a,b)=>a+b)/beatIv.length;
+    const sd=Math.sqrt(beatIv.reduce((a,b)=>a+(b-m)**2,0)/beatIv.length);
+    regularity=Math.max(0,1-sd/m);
+  }
+
+  // --- Tonart (Krumhansl-Schmuckler)
+  const corr=(a,b)=>{
+    const n=a.length, ma=a.reduce((x,y)=>x+y)/n, mb=b.reduce((x,y)=>x+y)/n;
+    let num=0,da=0,db=0;
+    for(let i=0;i<n;i++){num+=(a[i]-ma)*(b[i]-mb);da+=(a[i]-ma)**2;db+=(b[i]-mb)**2;}
+    return num/Math.sqrt(da*db+1e-12);
+  };
+  const ch=[...chroma];
+  let key={corr:-2};
+  for(let sh=0;sh<12;sh++){
+    const rot=ch.slice(sh).concat(ch.slice(0,sh));
+    for(const [name,prof] of [["dur",MAJOR],["moll",MINOR]]){
+      const c=corr(rot,prof);
+      if(c>key.corr) key={root:NOTES[sh], mode:name, corr:c};
+    }
+  }
+  key.notes = ch.map((v,i)=>[v,i]).sort((a,b)=>b[0]-a[0]).slice(0,4).map(x=>NOTES[x[1]]);
+
+  // --- Dynamik
+  let maxR=0; for(let i=0;i<nFrames;i++) if(rms[i]>maxR) maxR=rms[i];
+  const rmsDb = Array.from(rms, v=>20*Math.log10((v+1e-12)/(maxR+1e-12)));
+  const dbVals = rmsDb.filter(v=>isFinite(v));
+  const dbMean = dbVals.reduce((a,b)=>a+b,0)/dbVals.length;
+  const dbMin = Math.min(...dbVals.map(v=>Math.max(v,-80)));
+  const silence = dbVals.filter(v=>v<-40).length/dbVals.length;
+  let peak=0, sumSq=0;
+  for(let i=0;i<y.length;i++){ const a=Math.abs(y[i]); if(a>peak)peak=a; sumSq+=y[i]*y[i]; }
+  const crest = peak/(Math.sqrt(sumSq/y.length)+1e-12);
+
+  // --- Sektioner utifrån energiförändring
+  const smoothWin = Math.round(frameRate*3);
+  const smooth = new Float32Array(nFrames);
+  for(let i=0;i<nFrames;i++){
+    let s=0,n=0;
+    for(let j=Math.max(0,i-smoothWin); j<Math.min(nFrames,i+smoothWin); j++){s+=rms[j];n++;}
+    smooth[i]=s/n;
+  }
+  const novelty = new Float32Array(nFrames);
+  const lookAhead = Math.round(frameRate*1.5);
+  for(let i=lookAhead;i<nFrames-lookAhead;i++) novelty[i]=Math.abs(smooth[i+lookAhead]-smooth[i-lookAhead]);
+  const minSect = Math.round(frameRate*8);
+  const cand = [];
+  for(let i=minSect;i<nFrames-minSect;i++)
+    if(novelty[i]>=novelty[i-1] && novelty[i]>novelty[i+1]) cand.push([novelty[i],i]);
+  cand.sort((a,b)=>b[0]-a[0]);
+  const bounds=[];
+  for(const [,i] of cand){
+    if(bounds.length>=7) break;
+    if(bounds.every(b=>Math.abs(b-i)>=minSect)) bounds.push(i);
+  }
+  bounds.sort((a,b)=>a-b);
+  const edges=[0,...bounds,nFrames];
+  const sections=[];
+  for(let i=0;i<edges.length-1;i++){
+    let s=0; for(let j=edges[i];j<edges[i+1];j++) s+=rms[j];
+    sections.push({start:edges[i]/frameRate, end:edges[i+1]/frameRate, energy:s/(edges[i+1]-edges[i])});
+  }
+  const meanE = sections.reduce((a,s)=>a+s.energy,0)/sections.length + 1e-12;
+  for(const s of sections){
+    const r=s.energy/meanE;
+    s.label = r>1.15 ? "energisk" : r<0.85 ? "lugn" : "medel";
+  }
+
+  const mean = a=>{let s=0;for(const v of a)s+=v;return s/a.length;};
+  const totBand = bandEnergy.reduce((a,b)=>a+b,0)+1e-12;
+  return {
+    duration, bpm:Math.round(bpm*10)/10, regularity:Math.round(regularity*100)/100,
+    onsetDensity:Math.round(onsetTimes.length/duration*100)/100, nOnsets:onsetTimes.length,
+    key, centroid:Math.round(mean(centroid)), rolloff:Math.round(mean(rolloff)),
+    flatness:Math.round(mean(flatness)*1e4)/1e4,
+    bands:BANDS.map((b,i)=>({name:b[0], share:Math.round(1000*bandEnergy[i]/totBand)/10})),
+    rmsMeanDb:Math.round(dbMean*10)/10, dynRange:Math.round(-dbMin*10)/10,
+    crest:Math.round(crest*100)/100, silence:Math.round(silence*1000)/1000,
+    sections, rmsFrames:rms, frameRate,
+  };
+}
+
+function describe(r){
+  const d=[];
+  const tw = r.bpm<70?"långsamt":r.bpm<100?"lugnt":r.bpm<130?"medeltempo":r.bpm<160?"uppdrivet":"mycket snabbt";
+  d.push(`Tempot är ${tw} (${r.bpm} BPM).`);
+  d.push(`Tonarten uppskattas till ${r.key.root}-${r.key.mode} (säkerhet ${r.key.corr.toFixed(2)}). Mest framträdande toner: ${r.key.notes.join(", ")}.`);
+  const klang = r.centroid<1200?"mörk och basig":r.centroid<2500?"varm och balanserad":"ljus och luftig";
+  d.push(`Klangen är ${klang} (spektral tyngdpunkt kring ${r.centroid} Hz).`);
+  d.push(r.flatness>0.1?"Ljudbilden innehåller mycket brus/atmosfär.":"Ljudbilden är tonal med tydliga toner.");
+  const top=[...r.bands].sort((a,b)=>b.share-a.share)[0];
+  d.push(`Mest energi ligger i ${top.name.charAt(0).toLowerCase()+top.name.slice(1)} (${top.share} % av totalen).`);
+  d.push(r.onsetDensity>4?"Tät och rytmiskt aktiv ljudbild med många anslag.":
+         r.onsetDensity>1.5?"Måttlig rytmisk aktivitet.":"Gles, luftig ljudbild med få anslag.");
+  d.push(r.dynRange>40?"Stor dynamik — tydlig skillnad mellan starka och svaga partier.":
+         r.dynRange>20?"Måttlig dynamik.":"Komprimerad ljudbild med jämn styrka rakt igenom.");
+  const en = r.sections.filter(s=>s.label==="energisk").length;
+  d.push(`Låten delas in i ${r.sections.length} sektioner, varav ${en} med hög energi.`);
+  return d;
+}
+
+const fmtTime = s => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
+
+function drawWave(y, sections, duration){
+  const canvas=$("wave"), dpr=window.devicePixelRatio||1;
+  const w=canvas.clientWidth, h=120;
+  canvas.width=w*dpr; canvas.height=h*dpr;
+  const ctx=canvas.getContext("2d"); ctx.scale(dpr,dpr);
+  const css=getComputedStyle(document.documentElement);
+  const accent=css.getPropertyValue("--accent").trim(), line=css.getPropertyValue("--line").trim();
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle=line; ctx.beginPath(); ctx.moveTo(0,h/2); ctx.lineTo(w,h/2); ctx.stroke();
+  ctx.fillStyle=accent;
+  const spp=Math.floor(y.length/w);
+  for(let x=0;x<w;x++){
+    let mn=1,mx=-1;
+    const o=x*spp, step=Math.max(1,Math.floor(spp/50));
+    for(let i=0;i<spp;i+=step){const v=y[o+i];if(v<mn)mn=v;if(v>mx)mx=v;}
+    const y1=(1-mx)*h/2, y2=(1-mn)*h/2;
+    ctx.fillRect(x, y1, 1, Math.max(1,y2-y1));
+  }
+  ctx.fillStyle=line;
+  for(const s of sections.slice(1)){
+    const x=Math.round(s.start/duration*w);
+    ctx.fillRect(x,0,1,h);
+  }
+}
+
+function render(r, y, fileName){
+  $("results").style.display="flex";
+  $("stat-bpm").textContent=r.bpm;
+  $("stat-key").textContent=`${r.key.root}-${r.key.mode}`;
+  $("stat-len").textContent=fmtTime(r.duration);
+
+  $("summary").innerHTML = describe(r).map(t=>`<li>${t}</li>`).join("");
+
+  const maxShare=Math.max(...r.bands.map(b=>b.share),1);
+  $("bands").innerHTML = r.bands.map(b=>`
+    <div class="band">
+      <div class="name">${b.name}</div>
+      <div class="row">
+        <div class="track"><div class="fill" style="width:${Math.max(1,100*b.share/maxShare)}%"></div></div>
+        <div class="val mono">${b.share.toFixed(1)} %</div>
+      </div>
+    </div>`).join("");
+
+  $("kv").innerHTML = [
+    ["Spektral tyngdpunkt", r.centroid+" Hz"],
+    ["Rolloff (85 %)", r.rolloff+" Hz"],
+    ["Platthet (brusighet)", r.flatness],
+    ["Pulsjämnhet", r.regularity],
+    ["Anslag per sekund", r.onsetDensity],
+    ["RMS-medel", r.rmsMeanDb+" dB"],
+    ["Dynamiskt omfång", r.dynRange+" dB"],
+    ["Crest-faktor", r.crest],
+    ["Andel tystnad", Math.round(r.silence*100)+" %"],
+  ].map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join("");
+
+  const cls={lugn:"c1",medel:"c2",energisk:"c3"};
+  const maxE=Math.max(...r.sections.map(s=>s.energy),1e-9);
+  $("sections").innerHTML = r.sections.map((s,i)=>`
+    <div class="sect">
+      <span class="time mono">${fmtTime(s.start)}–${fmtTime(s.end)}</span>
+      <span class="strip"><i class="${""}" style="width:${Math.max(4,100*s.energy/maxE)}%;background:var(--seq-${s.label==="lugn"?1:s.label==="medel"?2:3})"></i></span>
+      <span class="chip ${cls[s.label]}">${s.label}</span>
+    </div>`).join("");
+
+  requestAnimationFrame(()=>drawWave(y, r.sections, r.duration));
+
+  lastReport =
+`ANALYS: ${fileName}
+Längd: ${fmtTime(r.duration)}  BPM: ${r.bpm}  Tonart: ${r.key.root}-${r.key.mode}
+
+${describe(r).map(t=>"• "+t).join("\n")}
+
+Frekvensbalans:
+${r.bands.map(b=>`  ${b.name}: ${b.share} %`).join("\n")}
+
+Klangfärg & dynamik:
+  Spektral tyngdpunkt: ${r.centroid} Hz · Rolloff: ${r.rolloff} Hz · Platthet: ${r.flatness}
+  RMS: ${r.rmsMeanDb} dB · Omfång: ${r.dynRange} dB · Crest: ${r.crest} · Tystnad: ${Math.round(r.silence*100)} %
+  Pulsjämnhet: ${r.regularity} · Anslag/s: ${r.onsetDensity}
+
+Struktur:
+${r.sections.map(s=>`  ${fmtTime(s.start)}–${fmtTime(s.end)}  ${s.label}`).join("\n")}`;
+}
+
+$("file-input").addEventListener("change", async e=>{
+  const file=e.target.files[0];
+  if(!file) return;
+  $("error").style.display="none";
+  $("results").style.display="none";
+  $("progress").style.display="block";
+  $("progress-file").textContent="Analyserar: "+file.name;
+  setProgress(3,"Avkodar ljudfilen …");
+  try{
+    const y=await decodeToMono(file);
+    setProgress(10,"Analyserar spektrum …");
+    const r=await analyze(y);
+    setProgress(100,"Klar!");
+    render(r,y,file.name);
+    $("progress").style.display="none";
+    $("results").scrollIntoView({behavior:"smooth"});
+  }catch(err){
+    $("progress").style.display="none";
+    $("error").style.display="block";
+    $("error").textContent="Kunde inte analysera filen. Kontrollera att det är en ljudfil i ett format som Safari stöder (mp3, m4a, wav, aac). Teknisk info: "+(err && err.message ? err.message : err);
+  }
+  e.target.value="";
+});
+
+$("copy-btn").addEventListener("click", async ()=>{
+  try{
+    await navigator.clipboard.writeText(lastReport);
+    $("copy-btn").textContent="Kopierad ✓";
+    setTimeout(()=>{$("copy-btn").textContent="Kopiera rapport";},1600);
+  }catch{
+    prompt("Kopiera texten:", lastReport);
+  }
+});
+</script>
