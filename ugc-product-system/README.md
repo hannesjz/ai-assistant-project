@@ -1,5 +1,7 @@
 # UGC Product Engine — digitalt produktsystem med mål 10 000 kr/dag
 
+> **Uppdatering:** för varianten helt utan inspelning, byggd på trendresearch juli 2026 (AI-UGC-vågen, Pinterest/Etsy-sök, karusellformat) — se **[V2-AI-UGC-STUDIO.md](V2-AI-UGC-STUDIO.md)**. V2 är den rekommenderade vägen; materialet nedan återanvänds som råmaterial.
+
 Ett komplett system för att sälja digitala produkter till UGC-kreatörer (User Generated Content), byggt helt på gratisverktyg och AI, utan lager, utan startkapital, utan befintlig publik.
 
 > **Ärlig utgångspunkt först.** Inget system i världen garanterar 10 000 kr/dag, och "autopilot från dag 1" existerar inte — autopiloten är något du *bygger* under de första 2–4 veckorna och som sedan sköter 80–90 % av driften. Det här dokumentet behandlar 10 000 kr/dag som ett **designmål**: hela tratten är dimensionerad så att målet är matematiskt nåbart, och tillväxtloopen är byggd för att ta dig dit. Typisk realistisk ramp: första försäljningen inom 3–14 dagar, 500–2 000 kr/dag inom 1–3 månader om innehållsmotorn körs varje dag, och 10 000 kr/dag kräver att minst en innehållskanal får organiskt genomslag. Allt annat i dokumentet är byggt för att maximera sannolikheten för det.
